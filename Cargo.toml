@@ -1,0 +1,8 @@
+[package]
+authors = ["s. galiamov <sgalyamov@gmail.com>"]
+edition = "2018"
+name = "rust-web-api"
+version = "0.1.0"
+
+[dependencies]
+actix-web = "3.3.2"
