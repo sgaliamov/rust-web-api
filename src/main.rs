@@ -46,6 +46,7 @@ async fn get_note(
 
     Ok(res)
 }
+
 #[post("/")]
 async fn add_note(
     text: String,

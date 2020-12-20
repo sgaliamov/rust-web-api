@@ -1,4 +1,5 @@
 cargo +nightly build --release --out-dir=.\target\publish -Z unstable-options
 
+& "$PSScriptRoot\start-postgres.ps1"
 
-# start server
+.\target\publish\rust-web-api.exe

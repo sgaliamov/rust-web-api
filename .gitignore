@@ -1,7 +1,9 @@
+**/.suo
+**/*.csproj.user
 **/*.rs.bk
+**/NotesApi/.vs
 **/NotesApi/bin
 **/NotesApi/obj
-**/.suo
 /target
-Cargo.lock
 appsettings.Development.json
+Cargo.lock

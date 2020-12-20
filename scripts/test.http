@@ -1,8 +1,21 @@
-# @name post
+# @name post_rust
 POST http://localhost:8080
 
 text
 
 ###
 
-GET http://localhost:8080/1
+GET http://localhost:8080/{{post_rust.response.body.id}}
+
+
+
+###
+# @name post_asp
+POST http://localhost:5000
+
+asp
+
+###
+
+GET http://localhost:5000/{{post_asp.response.body.id}}
+
