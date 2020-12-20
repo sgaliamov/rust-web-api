@@ -78,17 +78,12 @@ async fn add_note(
         .unwrap();
 
     let id: i32 = one.get("id");
-    let timestamp: Timestamp<String> = one.get("timestamp");
-
-    let timestamp: String = match timestamp {
-        Timestamp::Value(value) => value,
-        _ => panic!(""),
-    };
+    let timestamp: DateTime<Utc> = one.get("timestamp");
 
     Ok(Json(Note {
         id,
         text: text.clone(),
-        timestamp: DateTime::parse_from_rfc3339(&timestamp).unwrap().into(),
+        timestamp,
     }))
 }
 
@@ -97,7 +92,7 @@ async fn add_note(
 // + 2. deserialize post
 // + 3. serialize get
 // + 4. connect to db https://docs.rs/tokio-postgres/0.6.0/tokio_postgres/index.html
-// 5. write to db
+// + 5. write to db
 // 6. query from db
 // 7. c# version
 // 8. benchmark
@@ -117,7 +112,7 @@ async fn main() -> std::io::Result<()> {
             "create table if not exists notes (
                 id serial,
                 text varchar not null,
-                timestamp timestamp without time zone default (now() at time zone 'utc') not null
+                timestamp timestamptz default now() not null
             )",
             &[],
         )
