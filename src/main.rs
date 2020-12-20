@@ -42,8 +42,7 @@ async fn get_note(
     })
     .await
     .map(|x| HttpResponse::Ok().json(x))
-    .map_err(|_| HttpResponse::InternalServerError())
-    .unwrap();
+    .map_err(|_| HttpResponse::InternalServerError())?;
 
     Ok(res)
 }
@@ -71,8 +70,7 @@ async fn add_note(
     })
     .await
     .map(|x| HttpResponse::Ok().json(x))
-    .map_err(|_| HttpResponse::InternalServerError())
-    .unwrap();
+    .map_err(|_| HttpResponse::InternalServerError())?;
 
     Ok(res)
 }
