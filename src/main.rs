@@ -1,14 +1,11 @@
 use actix_web::{
     get, post,
-    web::{self, Json, Path},
-    App, HttpResponse, HttpServer, Result,
+    web::{self, Path},
+    App, Error, HttpResponse, HttpServer, Result,
 };
 use chrono::{DateTime, Utc};
 use r2d2::Pool;
-use r2d2_postgres::{
-    postgres::{types::Timestamp, NoTls},
-    PostgresConnectionManager,
-};
+use r2d2_postgres::{postgres::NoTls, PostgresConnectionManager};
 use serde::Serialize;
 
 #[derive(Serialize)]
@@ -22,80 +19,63 @@ struct Note {
 async fn get_note(
     Path(id): Path<i32>,
     db: web::Data<Pool<PostgresConnectionManager<NoTls>>>,
-) -> Result<Json<Note>> {
-    let mut conn = db.get().unwrap();
-    let result = conn.query_one("SELECT 'text'", &[]).unwrap();
-    let value = result.get(0);
+) -> Result<HttpResponse, Error> {
+    let res = web::block::<_, _, r2d2_postgres::postgres::Error>(move || {
+        let mut conn = db.get().unwrap();
 
-    Ok(Json(Note {
-        id,
-        text: value,
-        timestamp: Utc::now(),
-    }))
+        let one = conn.query_one(
+            "select id, text, timestamp
+                from notes
+                where id = $1",
+            &[&id],
+        )?;
+
+        let id: i32 = one.get("id");
+        let text: String = one.get("text");
+        let timestamp: DateTime<Utc> = one.get("timestamp");
+
+        Ok(Note {
+            id,
+            text,
+            timestamp,
+        })
+    })
+    .await
+    .map(|x| HttpResponse::Ok().json(x))
+    .map_err(|_| HttpResponse::InternalServerError())
+    .unwrap();
+
+    Ok(res)
 }
-
 #[post("/")]
 async fn add_note(
     text: String,
     db: web::Data<Pool<PostgresConnectionManager<NoTls>>>,
-) -> Result<Json<Note>> {
-    // let res = web::block(move || {
-    //     let conn = db.get().unwrap();
+) -> Result<HttpResponse, Error> {
+    let res = web::block::<_, _, r2d2_postgres::postgres::Error>(move || {
+        let mut conn = db.get().unwrap();
 
-    //     let one = conn
-    //         .query_one(
-    //             "insert into notes (text) values ($1) returning id, timestamp",
-    //             &[&text],
-    //         )
-    //         .unwrap();
-
-    //     let id: u32 = one.get("id");
-    //     let timestamp: String = one.get("timestamp");
-
-    //     // Ok(Note {
-    //     //     id,
-    //     //     text: text.clone(),
-    //     //     timestamp: Utc::now(),
-    //     // })
-    //     Note {
-    //         id,
-    //         text: text.clone(),
-    //         timestamp: Utc::now(),
-    //     }
-    // })
-    // .await
-    // .map(|x| Json(x))
-    // .map_err(|_| HttpResponse::InternalServerError())?;
-    // Ok(res)
-
-    let mut conn = db.get().unwrap();
-
-    let one = conn
-        .query_one(
+        let one = conn.query_one(
             "insert into notes (text) values ($1) returning id, timestamp",
             &[&text],
-        )
-        .unwrap();
+        )?;
 
-    let id: i32 = one.get("id");
-    let timestamp: DateTime<Utc> = one.get("timestamp");
+        let id: i32 = one.get("id");
+        let timestamp: DateTime<Utc> = one.get("timestamp");
 
-    Ok(Json(Note {
-        id,
-        text: text.clone(),
-        timestamp,
-    }))
+        Ok(Note {
+            id,
+            text: text.clone(),
+            timestamp,
+        })
+    })
+    .await
+    .map(|x| HttpResponse::Ok().json(x))
+    .map_err(|_| HttpResponse::InternalServerError())
+    .unwrap();
+
+    Ok(res)
 }
-
-// todo:
-// + 1. 2 endpoints
-// + 2. deserialize post
-// + 3. serialize get
-// + 4. connect to db https://docs.rs/tokio-postgres/0.6.0/tokio_postgres/index.html
-// + 5. write to db
-// 6. query from db
-// 7. c# version
-// 8. benchmark
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
