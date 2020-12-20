@@ -65,7 +65,7 @@ async fn add_note(
 
         Ok(Note {
             id,
-            text: text.clone(),
+            text,
             timestamp,
         })
     })

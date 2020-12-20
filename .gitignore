@@ -1,9 +1,10 @@
 **/.suo
 **/*.csproj.user
 **/*.rs.bk
-**/NotesApi/.vs
-**/NotesApi/bin
-**/NotesApi/obj
 /target
 appsettings.Development.json
+BenchmarkDotNet.Artifacts
 Cargo.lock
+dotnet/**/.vs
+dotnet/**/bin
+dotnet/**/obj
