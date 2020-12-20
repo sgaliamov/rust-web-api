@@ -42,11 +42,11 @@ async fn get_note(
     })
     .await
     .map(|x| HttpResponse::Ok().json(x))
-    .map_err(|_| HttpResponse::InternalServerError())
-    .unwrap();
+    .map_err(|_| HttpResponse::InternalServerError())?;
 
     Ok(res)
 }
+
 #[post("/")]
 async fn add_note(
     text: String,
@@ -65,14 +65,13 @@ async fn add_note(
 
         Ok(Note {
             id,
-            text: text.clone(),
+            text,
             timestamp,
         })
     })
     .await
     .map(|x| HttpResponse::Ok().json(x))
-    .map_err(|_| HttpResponse::InternalServerError())
-    .unwrap();
+    .map_err(|_| HttpResponse::InternalServerError())?;
 
     Ok(res)
 }
