@@ -24,7 +24,7 @@ namespace Benchmark
         [RankColumn]
         public class Benchmarks
         {
-            private const int Count = 1000;
+            private const int Count = 500;
             private static readonly HttpClient Client = new HttpClient();
 
             private static async Task Step(string url)
