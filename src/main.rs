@@ -1,27 +1,30 @@
 use actix_web::{
     get, post,
     web::{self, Json, Path},
-    App, HttpServer, Result,
+    App, HttpResponse, HttpServer, Result,
 };
 use chrono::{DateTime, Utc};
 use r2d2::Pool;
-use r2d2_postgres::{postgres::NoTls, PostgresConnectionManager};
+use r2d2_postgres::{
+    postgres::{types::Timestamp, NoTls},
+    PostgresConnectionManager,
+};
 use serde::Serialize;
 
 #[derive(Serialize)]
 struct Note {
-    id: u32,
+    id: i32,
     text: String,
     timestamp: DateTime<Utc>,
 }
 
 #[get("/{id}")]
 async fn get_note(
-    Path(id): Path<u32>,
+    Path(id): Path<i32>,
     db: web::Data<Pool<PostgresConnectionManager<NoTls>>>,
 ) -> Result<Json<Note>> {
-    let mut client = db.get().unwrap();
-    let result = client.query_one("SELECT 'text'", &[]).unwrap();
+    let mut conn = db.get().unwrap();
+    let result = conn.query_one("SELECT 'text'", &[]).unwrap();
     let value = result.get(0);
 
     Ok(Json(Note {
@@ -32,8 +35,61 @@ async fn get_note(
 }
 
 #[post("/")]
-async fn add_note(text: String) -> Result<Json<u32>> {
-    Ok(Json(1))
+async fn add_note(
+    text: String,
+    db: web::Data<Pool<PostgresConnectionManager<NoTls>>>,
+) -> Result<Json<Note>> {
+    // let res = web::block(move || {
+    //     let conn = db.get().unwrap();
+
+    //     let one = conn
+    //         .query_one(
+    //             "insert into notes (text) values ($1) returning id, timestamp",
+    //             &[&text],
+    //         )
+    //         .unwrap();
+
+    //     let id: u32 = one.get("id");
+    //     let timestamp: String = one.get("timestamp");
+
+    //     // Ok(Note {
+    //     //     id,
+    //     //     text: text.clone(),
+    //     //     timestamp: Utc::now(),
+    //     // })
+    //     Note {
+    //         id,
+    //         text: text.clone(),
+    //         timestamp: Utc::now(),
+    //     }
+    // })
+    // .await
+    // .map(|x| Json(x))
+    // .map_err(|_| HttpResponse::InternalServerError())?;
+    // Ok(res)
+
+    let mut conn = db.get().unwrap();
+
+    let one = conn
+        .query_one(
+            "insert into notes (text) values ($1) returning id, timestamp",
+            &[&text],
+        )
+        .unwrap();
+
+    let id: i32 = one.get("id");
+    let timestamp: Timestamp<String> = one.get("timestamp");
+
+    let timestamp: String = match timestamp {
+        Timestamp::Value(value) => value,
+        _ => panic!(""),
+    };
+
+    Ok(Json(Note {
+        id,
+        text: text.clone(),
+        timestamp: DateTime::parse_from_rfc3339(&timestamp).unwrap().into(),
+    }))
 }
 
 // todo:
@@ -61,7 +117,8 @@ async fn main() -> std::io::Result<()> {
             "create table if not exists notes (
                 id serial,
                 text varchar not null,
-                timestamp timestamp without time zone default (now() at time zone 'utc'))",
+                timestamp timestamp without time zone default (now() at time zone 'utc') not null
+            )",
             &[],
         )
         .unwrap();
