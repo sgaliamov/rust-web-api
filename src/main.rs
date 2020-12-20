@@ -5,10 +5,7 @@ use actix_web::{
 };
 use chrono::{DateTime, Utc};
 use r2d2::Pool;
-use r2d2_postgres::{
-    postgres::{NoTls, SimpleQueryMessage},
-    PostgresConnectionManager,
-};
+use r2d2_postgres::{postgres::NoTls, PostgresConnectionManager};
 use serde::Serialize;
 
 #[derive(Serialize)]
@@ -24,11 +21,12 @@ async fn get_note(
     db: web::Data<Pool<PostgresConnectionManager<NoTls>>>,
 ) -> Result<Json<Note>> {
     let mut client = db.get().unwrap();
-    let result = client.query_one("SELECT 1", &[]).unwrap();
+    let result = client.query_one("SELECT 'text'", &[]).unwrap();
+    let value = result.get(0);
 
     Ok(Json(Note {
         id,
-        text: "".to_string(),
+        text: value,
         timestamp: Utc::now(),
     }))
 }
@@ -57,6 +55,16 @@ async fn main() -> std::io::Result<()> {
         NoTls,
     );
     let pool = r2d2::Pool::new(manager).unwrap();
+    let mut client = pool.get().unwrap();
+    client
+        .execute(
+            "create table if not exists notes (
+                id serial,
+                text varchar not null,
+                timestamp timestamp without time zone default (now() at time zone 'utc'))",
+            &[],
+        )
+        .unwrap();
 
     HttpServer::new(move || {
         App::new()

@@ -3,6 +3,7 @@
         "actix",
         "adminer",
         "chrono",
-        "postgres"
+        "postgres",
+        "varchar"
     ]
 }
