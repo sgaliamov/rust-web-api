@@ -6,6 +6,5 @@
     "postgres",
     "timestamptz",
     "varchar"
-  ],
-  "rust-analyzer.diagnostics.disabled": ["macro-error"]
+  ]
 }
