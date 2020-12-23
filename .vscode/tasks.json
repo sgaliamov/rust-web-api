@@ -2,11 +2,19 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "type": "cargo",
-      "subcommand": "",
+      "type": "shell",
+      "command": "cargo",
+      "args": [
+        "+nightly",
+        "build",
+        "--release",
+        "--out-dir=./target/publish",
+        "-Z",
+        "unstable-options"
+      ],
       "problemMatcher": ["$rustc"],
       "group": { "isDefault": true, "kind": "build" },
-      "label": "rust: cargo build"
+      "label": "Build"
     }
   ]
 }
