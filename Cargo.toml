@@ -6,6 +6,8 @@ version = "0.1.0"
 
 [dependencies]
 actix-web = "3.3"
+bb8 = "0.4.0-pre"
+bb8-postgres = "0.4.0-pre"
 chrono = {version = "0.4", features = ["serde"]}
 r2d2 = "0.8"
 r2d2_postgres = "0.17"
