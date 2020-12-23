@@ -4,17 +4,24 @@
     {
       "type": "shell",
       "command": "cargo",
+      "args": ["+nightly", "build", "--debug"],
+      "problemMatcher": ["$rustc"],
+      "group": { "isDefault": true, "kind": "build" },
+      "label": "Build"
+    },
+    {
+      "type": "shell",
+      "command": "cargo",
       "args": [
         "+nightly",
-        "build",
+        "publish",
         "--release",
         "--out-dir=./target/publish",
         "-Z",
         "unstable-options"
       ],
       "problemMatcher": ["$rustc"],
-      "group": { "isDefault": true, "kind": "build" },
-      "label": "Build"
+      "label": "Publish"
     }
   ]
 }

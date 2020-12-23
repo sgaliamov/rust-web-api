@@ -124,6 +124,8 @@ async fn main() -> std::io::Result<()> {
         .await
         .unwrap();
 
+    println!("Listening on http://localhost:9080");
+
     let pool = pool.clone();
     HttpServer::new(move || {
         App::new()

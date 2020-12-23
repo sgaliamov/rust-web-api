@@ -24,7 +24,7 @@ namespace Benchmark
         [RankColumn]
         public class Benchmarks
         {
-            private const int Count = 500;
+            private const int Count = 300;
             private static readonly HttpClient Client = new HttpClient();
 
             private static async Task Step(string url)
@@ -50,9 +50,15 @@ namespace Benchmark
             }
 
             [Benchmark]
-            public void Rust()
+            public void R2D2()
             {
                 for (var i = 0; i < Count; i++) Step("http://localhost:8080").GetAwaiter().GetResult();
+            }
+
+            [Benchmark]
+            public void BB8()
+            {
+                for (var i = 0; i < Count; i++) Step("http://localhost:9080").GetAwaiter().GetResult();
             }
 
             [Benchmark]

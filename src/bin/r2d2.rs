@@ -97,6 +97,8 @@ async fn main() -> std::io::Result<()> {
         )
         .unwrap();
 
+    println!("Listening on http://localhost:8080");
+
     HttpServer::new(move || {
         App::new()
             .data(pool.clone())
