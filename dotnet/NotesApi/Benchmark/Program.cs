@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -46,25 +47,52 @@ namespace Benchmark
                     .DeserializeAsync<Note>(get)
                     .ConfigureAwait(false);
 
-                if (note.text != posted.text) throw new InvalidOperationException();
+                if (note.text != posted.text)
+                {
+                    throw new InvalidOperationException();
+                }
             }
 
             [Benchmark]
             public void R2D2()
             {
-                for (var i = 0; i < Count; i++) Step("http://localhost:8080").GetAwaiter().GetResult();
+                for (var i = 0; i < Count; i++)
+                {
+                    Step("http://localhost:8080").GetAwaiter().GetResult();
+                }
             }
 
             [Benchmark]
             public void BB8()
             {
-                for (var i = 0; i < Count; i++) Step("http://localhost:9080").GetAwaiter().GetResult();
+                for (var i = 0; i < Count; i++)
+                {
+                    Step("http://localhost:9080").GetAwaiter().GetResult();
+                }
             }
 
             [Benchmark]
             public void Asp()
             {
-                for (var i = 0; i < Count; i++) Step("http://localhost:5000").GetAwaiter().GetResult();
+                for (var i = 0; i < Count; i++)
+                {
+                    Step("http://localhost:5000").GetAwaiter().GetResult();
+                }
+            }
+
+            [Benchmark]
+            public void R2D2_Parallel() => RunInParallel(_ => Step("http://localhost:8080"));
+
+            [Benchmark]
+            public void BB8_Parallel() => RunInParallel(_ => Step("http://localhost:9080"));
+
+            [Benchmark]
+            public void Asp_Parallel() => RunInParallel(_ => Step("http://localhost:5000"));
+
+            private static void RunInParallel(Func<int, Task> selector)
+            {
+                var tasks = Enumerable.Range(0, Count).AsParallel().Select(selector).ToArray();
+                Task.WaitAll(tasks);
             }
         }
     }
