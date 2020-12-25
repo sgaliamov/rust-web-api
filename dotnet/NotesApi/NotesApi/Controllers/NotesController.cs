@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Globalization;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Dapper;
@@ -47,9 +49,12 @@ namespace NotesApi.Controllers
                         where id = @id", new { id })
                 .ConfigureAwait(false);
         }
+
+        [HttpGet("date")]
+        public string GetDate() => DateTime.UtcNow.ToString(CultureInfo.InvariantCulture);
     }
 
-    public record NoteId(int Id, System.DateTime Timestamp);
+    public record NoteId(int Id, DateTime Timestamp);
 
-    public record Note(int Id, string Text, System.DateTime Timestamp) : NoteId(Id, Timestamp);
+    public record Note(int Id, string Text, DateTime Timestamp) : NoteId(Id, Timestamp);
 }
