@@ -5,7 +5,7 @@ use actix_web::{
     http::StatusCode,
     post,
     web::{self, Path},
-    App, Error, HttpResponse, HttpServer, Result,
+    App, Error, HttpRequest, HttpResponse, HttpServer, Responder, Result,
 };
 use bb8::Pool;
 use bb8_postgres::{tokio_postgres::NoTls, PostgresConnectionManager};
@@ -17,6 +17,11 @@ struct Note {
     id: i32,
     text: String,
     timestamp: DateTime<Utc>,
+}
+
+#[get("/date")]
+async fn get_date(_: HttpRequest) -> impl Responder {
+    Utc::now().to_rfc3339()
 }
 
 #[get("/{id}")]
@@ -76,7 +81,7 @@ async fn add_note(
                 .await;
 
             match prepare {
-                Ok(select) => match cl.query_one(&select, &[&text]).await {
+                Ok(query) => match cl.query_one(&query, &[&text]).await {
                     Ok(one) => {
                         let id: i32 = one.get("id");
                         let timestamp: DateTime<Utc> = one.get("timestamp");
@@ -132,6 +137,7 @@ async fn main() -> std::io::Result<()> {
             .data(pool.clone())
             .service(get_note)
             .service(add_note)
+            .service(get_date)
     })
     .bind("127.0.0.1:9080")?
     .run()

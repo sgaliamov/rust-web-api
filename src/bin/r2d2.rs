@@ -1,7 +1,7 @@
 use actix_web::{
     get, post,
     web::{self, Path},
-    App, Error, HttpResponse, HttpServer, Result,
+    App, Error, HttpRequest, HttpResponse, HttpServer, Responder, Result,
 };
 use chrono::{DateTime, Utc};
 use r2d2::Pool;
@@ -15,6 +15,11 @@ struct Note {
     timestamp: DateTime<Utc>,
 }
 
+#[get("/date")]
+async fn get_date(_: HttpRequest) -> impl Responder {
+    Utc::now().to_rfc3339()
+}
+
 #[get("/{id}")]
 async fn get_note(
     Path(id): Path<i32>,
@@ -22,7 +27,6 @@ async fn get_note(
 ) -> Result<HttpResponse, Error> {
     let res = web::block::<_, _, r2d2_postgres::postgres::Error>(move || {
         let mut conn = db.get().unwrap();
-
         let one = conn.query_one(
             "select id, text, timestamp
                 from notes
@@ -104,6 +108,7 @@ async fn main() -> std::io::Result<()> {
             .data(pool.clone())
             .service(get_note)
             .service(add_note)
+            .service(get_date)
     })
     .bind("127.0.0.1:8080")?
     .run()
