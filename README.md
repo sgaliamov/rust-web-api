@@ -2,18 +2,15 @@
 
 Sample web API server on Rust.
 
-## Does
+There are `r2d2` and `bb8` based implementations here, as well as `asp.net` for comparison.
 
-1. Add a record to SQL DB.
-2. Get a record from SQL DB.
+## This does
 
-## How to run
+1. Adds a note to `PostgreSQL`.
+1. Returns a note from `PostgreSQL`.
+1. Returns current date.
 
-``` ps1
-.\scripts\run.ps1
-```
-
-### Results
+## Results
 
 ``` ini
 BenchmarkDotNet=v0.12.1, OS=Windows 10.0.19042
@@ -23,11 +20,29 @@ Intel Core i7-8750H CPU 2.20GHz (Coffee Lake), 1 CPU, 12 logical and 6 physical 
   DefaultJob : .NET Core 5.0.1 (CoreCLR 5.0.120.57516, CoreFX 5.0.120.57516), X64 RyuJIT
 ```
 
-| Method        |     Mean |    Error |   StdDev |   Median |
-| ------------- | -------: | -------: | -------: | -------: |
-| Asp_Parallel  | 223.9 ms |  9.87 ms | 29.11 ms | 226.0 ms |
-| R2D2_Parallel | 241.9 ms |  4.80 ms |  4.25 ms | 242.1 ms |
-| BB8_Parallel  | 283.3 ms |  5.64 ms | 10.31 ms | 284.5 ms |
-| R2D2_Sequence | 904.4 ms | 17.89 ms | 44.89 ms | 910.2 ms |
-| BB8_Sequence  | 966.2 ms | 18.56 ms | 18.22 ms | 964.7 ms |
-| Asp_Sequence  | 511.6 ms | 20.43 ms | 60.23 ms | 519.0 ms |
+### ASP.NET
+
+| Method    | Parallel | Path       |         Mean |       Error |      StdDev |       Median |
+| --------- | -------- | ---------- | -----------: | ----------: | ----------: | -----------: |
+| Benchmark | True     | GET /date  |     9.764 ms |   0.1692 ms |   0.1500 ms |     9.713 ms |
+| Benchmark | False    | GET /date  |    43.043 ms |   0.8405 ms |   0.7862 ms |    42.742 ms |
+| Benchmark | True     | POST & GET |   589.727 ms |  40.3020 ms | 118.8312 ms |   596.048 ms |
+| Benchmark | False    | POST & GET | 3,157.214 ms | 231.7176 ms | 675.9310 ms | 3,165.454 ms |
+
+### BB8
+
+| Method    | Parallel | Path       |         Mean |       Error |       StdDev |       Median |
+| --------- | -------- | ---------- | -----------: | ----------: | -----------: | -----------: |
+| Benchmark | True     | GET /date  |     9.054 ms |   0.2258 ms |    0.6478 ms |     8.990 ms |
+| Benchmark | False    | GET /date  |    37.105 ms |   0.7373 ms |    1.6941 ms |    36.482 ms |
+| Benchmark | True     | POST & GET |   888.076 ms |  48.6239 ms |   142.605 ms |   867.573 ms |
+| Benchmark | False    | POST & GET | 5,031.185 ms | 368.6956 ms | 1,087.107 ms | 4,895.177 ms |
+
+### R2D2
+
+| Method    | Parallel | Path       |         Mean |       Error |      StdDev |       Median |
+| --------- | -------- | ---------- | -----------: | ----------: | ----------: | -----------: |
+| Benchmark | True     | GET /date  |     8.945 ms |   0.2274 ms |   0.6596 ms |     8.935 ms |
+| Benchmark | False    | GET /date  |    39.317 ms |   0.7753 ms |   1.7969 ms |    38.967 ms |
+| Benchmark | True     | POST & GET |   976.429 ms |  51.5924 ms | 152.1214 ms |   966.551 ms |
+| Benchmark | False    | POST & GET | 5,042.993 ms | 281.0737 ms | 828.7520 ms | 5,045.977 ms |

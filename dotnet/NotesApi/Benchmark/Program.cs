@@ -18,15 +18,38 @@ namespace Benchmark
         }
 
         [MedianColumn]
-        [RankColumn]
         public class Benchmarks
         {
             private const string ConnectionString =
                 "User ID=postgres;Password=postgres;Host=localhost;Port=5432;Database=postgres;Pooling=true;";
 
-            private const int Count = 100;
+            private const int Count = 500;
             private static readonly HttpClient Client = new HttpClient();
-            private static readonly SemaphoreSlim Semaphore = new SemaphoreSlim(4);
+            private static readonly SemaphoreSlim Semaphore = new SemaphoreSlim(10);
+
+            [Params(8080, 9080, 5000)]
+            public int Port { get; set; }
+
+            [Params(true, false)]
+            public bool Parallel { get; set; }
+
+            [Params("", "/date")]
+            public string Path { get; set; }
+
+            [GlobalSetup]
+            public void GlobalSetup()
+            {
+                using var connection = new NpgsqlConnection(ConnectionString);
+
+                connection.Execute("drop table if exists notes");
+                Thread.Sleep(1000);
+                connection.Execute(@"
+                    create table if not exists notes (
+                        id serial,
+                            text varchar not null,
+                        timestamp timestamptz default now() not null)");
+                Thread.Sleep(1000);
+            }
 
             public static async Task Step(string url)
             {
@@ -51,51 +74,24 @@ namespace Benchmark
             }
 
             [Benchmark]
-            public void R2D2_Parallel() => RunInParallel(_ => Step("http://localhost:8080"));
-
-            [Benchmark]
-            public void BB8_Parallel() => RunInParallel(_ => Step("http://localhost:9080"));
-
-            [Benchmark]
-            public void Asp_Parallel() => RunInParallel(_ => Step("http://localhost:5000"));
-
-            [Benchmark]
-            public void R2D2_Sequence()
+            public void Benchmark()
             {
-                RunInSequence("http://localhost:8080");
+                var url = $"http://localhost:{Port}{Path}";
+
+                if (Parallel)
+                {
+                    RunInParallel(_ => Step(url));
+                }
+                else
+                {
+                    RunInSequence(url);
+                }
             }
 
-            [Benchmark]
-            public void BB8_Sequence()
-            {
-                RunInSequence("http://localhost:9080");
-            }
-
-            [Benchmark]
-            public void Asp_Sequence()
-            {
-                RunInSequence("http://localhost:5000");
-            }
-
-            public static void RunInParallel(Func<int, Task> selector)
+            private static void RunInParallel(Func<int, Task> selector)
             {
                 var tasks = Enumerable.Range(0, Count).AsParallel().Select(selector).ToArray();
                 Task.WaitAll(tasks);
-            }
-
-            [GlobalSetup]
-            public void GlobalSetup()
-            {
-                using var connection = new NpgsqlConnection(ConnectionString);
-
-                connection.Execute("drop table if exists notes");
-                Thread.Sleep(1000);
-                connection.Execute(@"
-                    create table if not exists notes (
-                        id serial,
-                            text varchar not null,
-                        timestamp timestamptz default now() not null)");
-                Thread.Sleep(1000);
             }
 
             private static void RunInSequence(string url)
