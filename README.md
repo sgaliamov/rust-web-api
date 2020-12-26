@@ -6,8 +6,8 @@ There are `r2d2` and `bb8` based implementations here, as well as `asp.net` for 
 
 ## This does
 
-1. Adds a note to SQL DB.
-1. Returns a note from Postgres DB.
+1. Adds a note to `PostgreSQL`.
+1. Returns a note from `PostgreSQL`.
 1. Returns current date.
 
 ## Results
