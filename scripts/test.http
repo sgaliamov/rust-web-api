@@ -4,7 +4,6 @@ POST http://localhost:8080
 text
 
 ###
-
 GET http://localhost:8080/{{post_r2d2.response.body.id}}
 
 
@@ -15,7 +14,6 @@ POST http://localhost:9080
 text
 
 ###
-
 GET http://localhost:9080/{{post_bb8.response.body.id}}
 
 ###
@@ -25,6 +23,7 @@ POST http://localhost:5000
 asp
 
 ###
-
 GET http://localhost:5000/{{post_asp.response.body.id}}
 
+###
+GET http://localhost:5000/date

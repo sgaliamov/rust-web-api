@@ -23,7 +23,7 @@ namespace Benchmark
             private const string ConnectionString =
                 "User ID=postgres;Password=postgres;Host=localhost;Port=5432;Database=postgres;Pooling=true;";
 
-            private const int Count = 100;
+            private const int Count = 500;
             private static readonly HttpClient Client = new HttpClient();
             private static readonly SemaphoreSlim Semaphore = new SemaphoreSlim(10);
 

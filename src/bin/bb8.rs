@@ -41,7 +41,7 @@ async fn get_note(
                 .await;
 
             match prepare {
-                Ok(select) => match cl.query_one(&select, &[&id]).await {
+                Ok(query) => match cl.query_one(&query, &[&id]).await {
                     Ok(one) => {
                         let id: i32 = one.get("id");
                         let text: String = one.get("text");
@@ -135,9 +135,9 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .data(pool.clone())
+            .service(get_date)
             .service(get_note)
             .service(add_note)
-            .service(get_date)
     })
     .bind("127.0.0.1:9080")?
     .run()
