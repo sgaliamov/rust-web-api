@@ -5,6 +5,6 @@
 appsettings.Development.json
 BenchmarkDotNet.Artifacts
 Cargo.lock
-dotnet/**/.vs
-dotnet/**/bin
-dotnet/**/obj
+asp.net/**/.vs
+asp.net/**/bin
+asp.net/**/obj
