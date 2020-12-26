@@ -1,6 +1,4 @@
-# rust-web-api
-
-Sample web API server on Rust.
+# Sample web API server on Rust
 
 There are `r2d2` and `bb8` based implementations here, as well as `asp.net` for comparison.
 
